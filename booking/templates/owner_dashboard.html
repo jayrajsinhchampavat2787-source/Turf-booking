@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Turf Manager Dashboard - TurfX{% endblock %}
+
+{% block content %}
+<div class="bg-dark text-white py-4 border-bottom">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <span class="badge bg-warning text-dark px-3 py-1 mb-2">PARTNER & ADMIN PORTAL</span>
+                <h1 class="h3 fw-bold mb-0">Turf Management Dashboard</h1>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'owner_add_turf' %}" class="btn btn-turf px-3 py-2 fw-semibold">
+                    <i class="bi bi-plus-circle me-1"></i> Add New Turf
+                </a>
+                <a href="/admin/" target="_blank" class="btn btn-outline-light px-3 py-2">
+                    <i class="bi bi-shield-lock me-1"></i> Django Admin
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <!-- Key Business Metrics Row -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-3 col-sm-6">
+            <div class="card border-0 rounded-4 p-4 shadow-sm bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Total Turfs</span>
+                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-2">
+                        <i class="bi bi-grid-fill fs-5"></i>
+                    </div>
+                </div>
+                <h2 class="fw-extrabold text-dark mb-0">{{ total_turfs }}</h2>
+                <small class="text-success fw-semibold"><i class="bi bi-check-circle"></i> Active on platform</small>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-sm-6">
+            <div class="card border-0 rounded-4 p-4 shadow-sm bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Total Bookings</span>
+                    <div class="rounded-circle bg-info bg-opacity-10 text-info p-2">
+                        <i class="bi bi-calendar-check-fill fs-5"></i>
+                    </div>
+                </div>
+                <h2 class="fw-extrabold text-dark mb-0">{{ total_bookings }}</h2>
+                <small class="text-muted">All-time reservation volume</small>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-sm-6">
+            <div class="card border-0 rounded-4 p-4 shadow-sm bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Confirmed Matches</span>
+                    <div class="rounded-circle bg-success bg-opacity-10 text-success p-2">
+                        <i class="bi bi-patch-check-fill fs-5"></i>
+                    </div>
+                </div>
+                <h2 class="fw-extrabold text-success mb-0">{{ confirmed_bookings }}</h2>
+                <small class="text-success fw-semibold">Zero double-bookings</small>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-sm-6">
+            <div class="card border-0 rounded-4 p-4 shadow-sm bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Total Revenue</span>
+                    <div class="rounded-circle bg-warning bg-opacity-10 text-warning p-2">
+                        <i class="bi bi-currency-rupee fs-5"></i>
+                    </div>
+                </div>
+                <h2 class="fw-extrabold text-dark mb-0">₹{{ total_revenue|floatformat:0 }}</h2>
+                <small class="text-success fw-semibold"><i class="bi bi-graph-up-arrow"></i> Lowest price margin</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Managed Turfs Table -->
+    <div class="card border-0 rounded-4 shadow-sm bg-white mb-5 overflow-hidden">
+        <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold text-dark mb-0"><i class="bi bi-buildings text-turf me-2"></i>Managed Turfs & Venues</h5>
+            <a href="{% url 'owner_add_turf' %}" class="btn btn-turf btn-sm rounded-3">
+                <i class="bi bi-plus-lg me-1"></i> Add Turf
+            </a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-uppercase">
+                    <tr>
+                        <th class="ps-4">Turf Name</th>
+                        <th>Sport</th>
+                        <th>Location</th>
+                        <th>Lowest Rate</th>
+                        <th>Market Rate</th>
+                        <th>Rating</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for turf in turfs %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="{{ turf.image_url }}" alt="{{ turf.name }}" class="rounded-2" style="width: 45px; height: 45px; object-fit: cover;">
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ turf.name }}</div>
+                                        <small class="text-muted">{{ turf.slug }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge bg-secondary">{{ turf.get_sport_type_display }}</span></td>
+                            <td class="small">{{ turf.area }}, {{ turf.city }}</td>
+                            <td class="fw-bold text-turf">₹{{ turf.hourly_rate|floatformat:0 }}/hr</td>
+                            <td class="text-muted text-decoration-line-through small">₹{{ turf.original_rate|floatformat:0 }}</td>
+                            <td>
+                                <span class="badge bg-warning bg-opacity-10 text-dark">
+                                    <i class="bi bi-star-fill text-warning me-1"></i>{{ turf.rating }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if turf.is_active %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'turf_detail' turf.slug %}" target="_blank" class="btn btn-outline-secondary" title="View Public Page">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'owner_edit_turf' turf.id %}" class="btn btn-outline-primary" title="Edit Pricing & Details">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{% url 'owner_delete_turf' turf.id %}" class="btn btn-outline-danger" title="Delete Turf">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">No turfs created yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Recent Customer Bookings Table -->
+    <div class="card border-0 rounded-4 shadow-sm bg-white overflow-hidden">
+        <div class="p-4 border-bottom">
+            <h5 class="fw-bold text-dark mb-0"><i class="bi bi-calendar3 text-turf me-2"></i>Live Customer Bookings (Latest 20)</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-uppercase">
+                    <tr>
+                        <th class="ps-4">Booking ID</th>
+                        <th>Turf Name</th>
+                        <th>Match Date & Slot</th>
+                        <th>Captain Details</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Booked On</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in recent_bookings %}
+                        <tr>
+                            <td class="ps-4 fw-bold font-monospace text-turf">#{{ b.booking_id }}</td>
+                            <td class="fw-semibold text-dark">{{ b.turf.name }}</td>
+                            <td>
+                                <div class="small fw-bold">{{ b.date|date:"D, d M Y" }}</div>
+                                <div class="small text-muted">{{ b.slot.label }}</div>
+                            </td>
+                            <td>
+                                <div class="small fw-bold">{{ b.captain_name }}</div>
+                                <div class="small text-muted">{{ b.captain_phone }}</div>
+                            </td>
+                            <td class="fw-bold">₹{{ b.total_price|floatformat:0 }}</td>
+                            <td>
+                                {% if b.status == 'CONFIRMED' %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">CONFIRMED</span>
+                                {% elif b.status == 'CANCELLED' %}
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">CANCELLED</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">{{ b.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">{{ b.created_at|date:"d M H:i" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">No bookings recorded yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

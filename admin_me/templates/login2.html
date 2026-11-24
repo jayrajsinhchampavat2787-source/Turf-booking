@@ -1,0 +1,57 @@
+@model UserModel
+
+<div class="container">
+    <div class="register-box">
+        <div class="left">
+            <h2>Join the Game!</h2>
+            <p>Create an account to book turf easily.</p>
+        </div>
+
+        <div class="right">
+            <h2>Create Account</h2>
+
+            <form method="post">
+                <input type="text" name="FullName" placeholder="Full Name" required />
+                <input type="email" name="Email" placeholder="Email Address" required />
+                <input type="text" name="Phone" placeholder="Phone Number" required />
+                <input type="password" name="Password" placeholder="Password" required />
+
+                <input type="checkbox" required /> I agree to Terms & Conditions
+
+                <button type="submit">Register Now</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.register-box{
+    display:flex;
+    width:700px;
+    margin:auto;
+    box-shadow:0 0 10px gray;
+}
+.left{
+    background:#1f9d48;
+    color:white;
+    padding:40px;
+    width:50%;
+}
+.right{
+    background:#f3f3f3;
+    padding:40px;
+    width:50%;
+}
+input{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+}
+button{
+    background:#1f9d48;
+    color:white;
+    padding:10px;
+    width:100%;
+    border:none;
+}
+</style>

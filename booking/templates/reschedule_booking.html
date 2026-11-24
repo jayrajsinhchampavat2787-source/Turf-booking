@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reschedule Booking - {{ booking.booking_id }} | TurfX{% endblock %}
+
+{% block extra_head %}
+<style>
+    .slot-pill {
+        border: 2px solid #e2e8f0;
+        background: #ffffff;
+        color: #1e293b;
+        font-weight: 600;
+        border-radius: 12px;
+        padding: 0.75rem 0.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .slot-pill:hover:not(.disabled) {
+        border-color: var(--turf-green);
+        background: #f0fdf4;
+        transform: translateY(-2px);
+    }
+
+    .slot-pill.selected {
+        border-color: var(--turf-green);
+        background: var(--turf-green);
+        color: #ffffff;
+        box-shadow: 0 4px 14px rgba(22, 163, 74, 0.4);
+    }
+
+    .slot-pill.disabled {
+        background: #fee2e2;
+        border-color: #fecaca;
+        color: #991b1b;
+        cursor: not-allowed;
+        opacity: 0.75;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-dark text-white py-4 border-bottom">
+    <div class="container">
+        <h1 class="h3 fw-bold mb-1">Reschedule Match Slot</h1>
+        <p class="text-white-50 mb-0 small">Booking Ref: <span class="text-turf fw-bold">#{{ booking.booking_id }}</span> &bull; {{ turf.name }}</p>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 rounded-4 p-4 shadow-sm bg-white mb-4">
+                <div class="p-3 bg-light rounded-3 border mb-4">
+                    <span class="badge bg-secondary mb-1">Current Scheduled Slot</span>
+                    <h5 class="fw-bold text-dark mb-1">{{ turf.name }}</h5>
+                    <div class="text-muted small">
+                        <i class="bi bi-calendar-check text-turf me-1"></i> {{ booking.date|date:"D, d M Y" }} &bull;
+                        <i class="bi bi-clock-fill text-turf me-1"></i> {{ booking.slot.label }}
+                    </div>
+                </div>
+
+                <h5 class="fw-bold text-dark mb-3">Select New Match Date & Time Slot</h5>
+
+                <form action="{% url 'reschedule_booking' booking.booking_id %}" method="POST" id="rescheduleForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="slot_id" id="selectedSlotInput" value="{{ booking.slot.id }}">
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted"><i class="bi bi-calendar3 text-turf me-1"></i> Choose New Date</label>
+                        <input type="date" name="date" id="rescheduleDatePicker" class="form-control form-control-lg rounded-3 fw-bold" value="{{ booking.date|date:'Y-m-d' }}" min="{{ today }}">
+                    </div>
+
+                    <label class="form-label small fw-bold text-muted mb-2">Available Time Slots for New Date</label>
+                    <div id="slotsGrid" class="row g-2 mb-4" style="max-height: 280px; overflow-y: auto;">
+                        {% for slot in all_slots %}
+                            <div class="col-sm-6">
+                                {% if slot.id in booked_slot_ids and slot.id != booking.slot.id %}
+                                    <div class="slot-pill disabled" data-slot-id="{{ slot.id }}" data-slot-label="{{ slot.label }}">
+                                        <span class="small fw-bold">{{ slot.label }}</span>
+                                        <span class="badge bg-danger text-white" style="font-size: 0.65rem;">BOOKED</span>
+                                    </div>
+                                {% else %}
+                                    <div class="slot-pill {% if slot.id == booking.slot.id %}selected{% endif %}" data-slot-id="{{ slot.id }}" data-slot-label="{{ slot.label }}" onclick="selectRescheduleSlot(this)">
+                                        <span class="small fw-bold">{{ slot.label }}</span>
+                                        <span class="slot-status-text text-success" style="font-size: 0.7rem;">Available</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{% url 'my_bookings' %}" class="btn btn-outline-secondary rounded-3 px-4 py-2">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-turf rounded-3 px-4 py-2 fw-bold shadow">
+                            Confirm Reschedule <i class="bi bi-check2-circle ms-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const TURF_ID = "{{ turf.id }}";
+    const CURRENT_SLOT_ID = "{{ booking.slot.id }}";
+
+    function selectRescheduleSlot(el) {
+        if (el.classList.contains('disabled')) return;
+        document.querySelectorAll('.slot-pill').forEach(p => p.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('selectedSlotInput').value = el.getAttribute('data-slot-id');
+    }
+
+    document.getElementById('rescheduleDatePicker').addEventListener('change', function() {
+        const dateVal = this.value;
+        fetch(`/api/check-slots/?turf_id=${TURF_ID}&date=${dateVal}`)
+            .then(res => res.json())
+            .then(data => {
+                const bookedIds = data.booked_slot_ids || [];
+                const pills = document.querySelectorAll('.slot-pill');
+                pills.forEach(pill => {
+                    const slotId = parseInt(pill.getAttribute('data-slot-id'));
+                    pill.classList.remove('selected');
+                    if (bookedIds.includes(slotId)) {
+                        pill.className = 'slot-pill disabled';
+                        pill.onclick = null;
+                        pill.innerHTML = `
+                            <span class="small fw-bold">${pill.getAttribute('data-slot-label')}</span>
+                            <span class="badge bg-danger text-white" style="font-size: 0.65rem;">BOOKED</span>
+                        `;
+                    } else {
+                        pill.className = 'slot-pill';
+                        pill.onclick = function() { selectRescheduleSlot(this); };
+                        pill.innerHTML = `
+                            <span class="small fw-bold">${pill.getAttribute('data-slot-label')}</span>
+                            <span class="slot-status-text text-success" style="font-size: 0.7rem;">Available</span>
+                        `;
+                    }
+                });
+            });
+    });
+</script>
+{% endblock %}

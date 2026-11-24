@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Player Login - TURFX{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7">
+            <div class="card border-0 rounded-3 p-4 p-md-5 shadow-sm bg-white">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-shield-shaded text-success fs-2"></i>
+                        <span class="brand-font fs-3 fw-bold text-dark">TURF<span class="text-success">X</span></span>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-1">Player Login</h4>
+                    <p class="text-muted small">Sign in to book cricket turfs and view reservations.</p>
+                </div>
+
+                <form action="{% url 'login' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Username or Email</label>
+                        {{ form.username }}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-dark">Password</label>
+                        {{ form.password }}
+                    </div>
+
+                    <button type="submit" class="btn btn-turf btn-lg w-100 fw-bold py-2 shadow-sm rounded-2">
+                        Login <i class="bi bi-box-arrow-in-right ms-1"></i>
+                    </button>
+                </form>
+
+                <!-- Demo helper -->
+                <div class="p-3 bg-light rounded-2 mt-4 text-muted small border">
+                    <strong class="text-dark d-block mb-1"><i class="bi bi-person-badge text-success me-1"></i> Player Demo Account:</strong>
+                    Username: <code>player</code> &bull; Password: <code>player123</code>
+                </div>
+
+                <div class="text-center mt-4 pt-3 border-top">
+                    <p class="text-muted small mb-0">
+                        New player? <a href="{% url 'register' %}" class="text-success fw-bold text-decoration-none">Create Account</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

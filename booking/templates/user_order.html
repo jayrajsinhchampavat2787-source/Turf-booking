@@ -1,0 +1,217 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Cricket Turf Booking Website</title>
+
+  <!-- Favicons -->
+  <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Poppins&family=Raleway&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/aos/aos.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+</head>
+
+<body class="starter-page-page">
+
+  <!-- Header -->
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+      <a href="{% url 'home' %}" class="logo d-flex align-items-center">
+        <img src="{% static 'assets/img/logo.png' %}" alt="">
+        <h1 class="sitename">TURFX</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="{% url 'home' %}">Home</a></li>
+          <li><a href="{% url 'home' %}#turf">Turf</a></li>
+          <li><a href="{% url 'about' %}">About</a></li>
+          <li><a href="{% url 'services' %}">Service</a></li>
+          <li><a href="{% url 'contact' %}">Contact</a></li>
+          <li><a href="/user_orders/" class="active">My Slot</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Page Title -->
+  <main class="main">
+    <div class="page-title dark-background" data-aos="fade" style="background-image: url('{% static 'assets/img/hero-carousel/Box-Cricket.jpg' %}');">
+      <div class="container position-relative">
+        <h1>Your orders</h1>
+      </div>
+    </div>
+
+ <div class="form">
+   
+    <table align="center" border="1">
+        <tr>
+            <th>Captain Name</th>
+            <th>Email</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Hours</th>
+            <th>Members</th>
+            <th>Actions</th>
+        </tr>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.captain_name }}</td>
+            <td>{{ order.email }}</td>
+            <td>{{ order.select_date }}</td>
+            <td>{{ order.select_time }}</td>
+            <td>{{ order.hours }}</td>
+            <td>{{ order.number_of_members }}</td>
+            <td>
+                <a href="{% url 'user_cancel_order' order.id %}">Cancel</a> |
+                <a href="{% url 'user_update_order' order.id %}">Update</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7">No slot found.</td>
+        </tr>
+        {% endfor %}
+    </table>
+    </div>
+<style>
+    .form {
+        font-family: Arial, sans-serif;
+        background: #f2f2f2;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .form h2 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+    }
+
+    .form table {
+        border-collapse: collapse;
+        margin: 0 auto;
+        width: 90%;
+        background: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form th, td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #ccc;
+        text-align: center;
+    }
+
+    .form th {
+        background-color: #4CAF50;
+        color: white;
+        font-weight: bold;
+    }
+
+    .form tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    .form a {
+        text-decoration: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        margin: 0 2px;
+        color: white;
+    }
+
+    .form a[href*="cancel"] {
+        background-color: #e74c3c;
+    }
+
+   .form a[href*="update"] {
+        background-color: #3498db;
+    }
+
+   .form a:hover {
+        opacity: 0.85;
+    }
+
+   .form td[colspan="7"] {
+        text-align: center;
+        color: #777;
+        font-style: italic;
+        padding: 20px;
+    }
+</style>
+  </main>
+
+  <!-- Footer -->
+  <footer id="footer" class="footer dark-background">
+    <div class="container footer-top">
+      <div class="row gy-4">
+        <div class="col-lg-4 col-md-6 footer-about">
+          <a href="{% url 'home' %}" class="logo d-flex align-items-center">
+            <span class="sitename">TURFX</span>
+          </a>
+        </div>
+
+        <div class="col-lg-2 col-md-3 footer-links">
+          <h4>Useful Links</h4>
+          <ul>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="#">Terms & Conditions</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-4 col-md-12 footer-newsletter">
+          <h4>Our Newsletter</h4>
+          <p>Subscribe to our newsletter and receive the latest news about our upcoming turf and ground.</p>
+          <form action="{% url 'newsletter' %}" method="post" class="php-email-form">
+            {% csrf_token %}
+            <div class="newsletter-form">
+              <input type="email" name="email" required>
+              <input type="submit" value="Subscribe">
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="container copyright text-center mt-4">
+      <p>© <span>Copyright 2025</span> <strong class="px-1 sitename">TURFX</strong> <span>All Rights Reserved</span></p>
+    </div>
+  </footer>
+
+  <!-- Scroll Top -->
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/php-email-form/validate.js' %}"></script>
+  <script src="{% static 'assets/vendor/aos/aos.js' %}"></script>
+  <script src="{% static 'assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
+  <script src="{% static 'assets/vendor/glightbox/js/glightbox.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/imagesloaded/imagesloaded.pkgd.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/isotope-layout/isotope.pkgd.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+
+  <!-- Main JS File -->
+  <script src="{% static 'assets/js/main.js' %}"></script>
+</body>
+
+</html>

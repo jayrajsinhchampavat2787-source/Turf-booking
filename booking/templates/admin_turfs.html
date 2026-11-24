@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Turf Management - TURFX Admin{% endblock %}
+
+{% block content %}
+<div class="bg-dark text-white py-3 border-bottom">
+    <div class="container d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}" class="text-white-50 text-decoration-none">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item active text-success" aria-current="page">Turf Management</li>
+                </ol>
+            </nav>
+            <h1 class="h4 fw-bold mb-0">Turf Management</h1>
+        </div>
+        <div>
+            <a href="{% url 'admin_add_turf' %}" class="btn btn-success btn-sm fw-semibold">
+                <i class="bi bi-plus-circle me-1"></i> Add New Turf
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="card border-0 rounded-3 shadow-sm bg-white overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark small text-uppercase">
+                    <tr>
+                        <th class="ps-3">Turf</th>
+                        <th>Price (₹/hr)</th>
+                        <th>Location</th>
+                        <th>Availability</th>
+                        <th>Featured</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for turf in turfs %}
+                        <tr>
+                            <td class="ps-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="{{ turf.display_image }}" alt="{{ turf.name }}" class="rounded-2" style="width: 45px; height: 45px; object-fit: cover;">
+                                    <div>
+                                        <strong class="text-dark">{{ turf.name }}</strong>
+                                        <div class="small text-muted">{{ turf.slug }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="fw-bold fs-6 text-success">
+                                ₹{{ turf.price|floatformat:0 }}
+                            </td>
+                            <td class="small">
+                                {{ turf.location }}
+                            </td>
+                            <td>
+                                {% if turf.is_available %}
+                                    <span class="badge bg-success">Available</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Unavailable</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if turf.is_featured %}
+                                    <span class="badge bg-info text-dark">Yes</span>
+                                {% else %}
+                                    <span class="badge bg-light text-muted">No</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-3">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'turf_detail' turf.slug %}" target="_blank" class="btn btn-outline-secondary" title="View Turf Page">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'admin_edit_turf' turf.id %}" class="btn btn-outline-primary" title="Edit Turf Details & Price">
+                                        <i class="bi bi-pencil-square"></i> Edit
+                                    </a>
+                                    <a href="{% url 'admin_delete_turf' turf.id %}" class="btn btn-outline-danger" title="Delete Turf">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">No turfs in database.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

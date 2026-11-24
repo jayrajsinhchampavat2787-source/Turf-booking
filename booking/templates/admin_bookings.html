@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Booking Management - TURFX Admin{% endblock %}
+
+{% block content %}
+<div class="bg-dark text-white py-3 border-bottom">
+    <div class="container d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}" class="text-white-50 text-decoration-none">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item active text-success" aria-current="page">Booking Management</li>
+                </ol>
+            </nav>
+            <h1 class="h4 fw-bold mb-0">Booking Management</h1>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="?status=" class="btn btn-sm {% if not status_filter %}btn-light{% else %}btn-outline-light{% endif %}">All</a>
+            <a href="?status=Pending" class="btn btn-sm {% if status_filter == 'Pending' %}btn-warning text-dark{% else %}btn-outline-warning{% endif %}">Pending</a>
+            <a href="?status=Accepted" class="btn btn-sm {% if status_filter == 'Accepted' %}btn-success{% else %}btn-outline-success{% endif %}">Accepted</a>
+            <a href="?status=Rejected" class="btn btn-sm {% if status_filter == 'Rejected' %}btn-danger{% else %}btn-outline-danger{% endif %}">Rejected</a>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="card border-0 rounded-3 shadow-sm bg-white overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark small text-uppercase">
+                    <tr>
+                        <th class="ps-3">Booking ID</th>
+                        <th>Customer Name</th>
+                        <th>Customer Email</th>
+                        <th>Turf Name</th>
+                        <th>Booking Date</th>
+                        <th>Time Slot</th>
+                        <th>Amount</th>
+                        <th>Booking Status</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in bookings %}
+                        <tr>
+                            <!-- 1. Booking ID -->
+                            <td class="ps-3 fw-bold font-monospace text-success">
+                                #{{ b.booking_id }}
+                            </td>
+
+                            <!-- 2. Customer Name -->
+                            <td class="fw-semibold text-dark">
+                                {{ b.customer_name }}
+                            </td>
+
+                            <!-- 3. Customer Email -->
+                            <td class="small text-muted">
+                                {{ b.customer_email }}
+                                <div class="text-muted" style="font-size: 0.75rem;">{{ b.customer_phone }}</div>
+                            </td>
+
+                            <!-- 4. Turf Name -->
+                            <td class="fw-bold">
+                                {{ b.turf.name }}
+                            </td>
+
+                            <!-- 5. Booking Date -->
+                            <td class="small">
+                                {{ b.booking_date|date:"D, d M Y" }}
+                            </td>
+
+                            <!-- 6. Time Slot -->
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ b.slot.label }}</span>
+                            </td>
+
+                            <!-- 7. Amount -->
+                            <td class="fw-bold fs-6">
+                                ₹{{ b.total_amount|floatformat:0 }}
+                            </td>
+
+                            <!-- 8. Booking Status -->
+                            <td>
+                                {% if b.status == 'Pending' %}
+                                    <span class="badge-pending">Pending</span>
+                                {% elif b.status == 'Accepted' %}
+                                    <span class="badge-accepted">Accepted</span>
+                                {% elif b.status == 'Rejected' %}
+                                    <span class="badge-rejected">Rejected</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Functional buttons: Accept Booking & Reject Booking -->
+                            <td class="text-end pe-3">
+                                <div class="btn-group btn-group-sm">
+                                    {% if b.status != 'Accepted' %}
+                                        <a href="{% url 'admin_accept_booking' b.booking_id %}" class="btn btn-success" title="Accept and Confirm Booking">
+                                            <i class="bi bi-check-circle-fill me-1"></i> Accept
+                                        </a>
+                                    {% endif %}
+                                    {% if b.status != 'Rejected' %}
+                                        <a href="{% url 'admin_reject_booking' b.booking_id %}" class="btn btn-danger" title="Reject Booking">
+                                            <i class="bi bi-x-circle-fill me-1"></i> Reject
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-5 text-muted">
+                                No bookings found matching this filter.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

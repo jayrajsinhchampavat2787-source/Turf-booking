@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ turf.name }} - TURFX Details & Slot Booking{% endblock %}
+
+{% block extra_head %}
+<style>
+    .slot-btn {
+        border: 2px solid #cbd5e1;
+        background: #ffffff;
+        color: #1e293b;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 0.65rem 0.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.15rem;
+    }
+
+    .slot-btn:hover:not(.disabled) {
+        border-color: var(--turf-green);
+        background: #f0fdf4;
+    }
+
+    .slot-btn.selected {
+        border-color: var(--turf-green);
+        background: var(--turf-green);
+        color: #ffffff;
+    }
+
+    .slot-btn.disabled {
+        background: #fee2e2;
+        border-color: #fca5a5;
+        color: #991b1b;
+        cursor: not-allowed;
+        opacity: 0.75;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-dark text-white py-4 border-bottom">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <h1 class="h3 fw-bold mb-1">{{ turf.name }}</h1>
+                <p class="text-white-50 mb-0 small">
+                    <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ turf.location }}
+                </p>
+            </div>
+            <div class="text-md-end">
+                <span class="text-white-50 small d-block">Hourly Booking Rate</span>
+                <span class="fs-3 fw-bold text-success">₹{{ turf.price|floatformat:0 }} / hr</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="row g-4">
+        <!-- Left: Turf Photo and Details -->
+        <div class="col-lg-7">
+            <div class="card border-0 rounded-3 overflow-hidden shadow-sm mb-4">
+                <img src="{{ turf.display_image }}" alt="{{ turf.name }}" class="img-fluid" style="height: 380px; width: 100%; object-fit: cover;">
+            </div>
+
+            <div class="card border-0 rounded-3 p-4 shadow-sm bg-white mb-4">
+                <h5 class="fw-bold text-dark mb-3">About {{ turf.name }}</h5>
+                <p class="text-muted leading-relaxed mb-0">
+                    {{ turf.description }}
+                </p>
+            </div>
+
+            <div class="card border-0 rounded-3 p-4 shadow-sm bg-white">
+                <h5 class="fw-bold text-dark mb-3">Venue Highlights</h5>
+                <div class="row g-2 text-muted small">
+                    <div class="col-sm-6"><i class="bi bi-check-circle-fill text-success me-2"></i>High-Intensity LED Floodlights</div>
+                    <div class="col-sm-6"><i class="bi bi-check-circle-fill text-success me-2"></i>30ft High Safety Netting Enclosure</div>
+                    <div class="col-sm-6"><i class="bi bi-check-circle-fill text-success me-2"></i>True Bounce Cricket Pitch Mat</div>
+                    <div class="col-sm-6"><i class="bi bi-check-circle-fill text-success me-2"></i>Drinking Water &amp; Washrooms</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Real-Time Slot Picker -->
+        <div class="col-lg-5">
+            <div class="card border-0 rounded-3 p-4 shadow-sm bg-white sticky-top" style="top: 85px;">
+                <h5 class="fw-bold text-dark pb-2 border-bottom mb-3">
+                    <i class="bi bi-calendar-event text-success me-1"></i> Select Match Date &amp; Time
+                </h5>
+
+                <!-- Date Picker -->
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-dark">Match Date</label>
+                    <input type="date" id="matchDatePicker" class="form-control rounded-2 fw-semibold" value="{{ selected_date|date:'Y-m-d' }}" min="{{ today }}">
+                </div>
+
+                <!-- Slot Availability Legend -->
+                <div class="d-flex gap-3 mb-3 small p-2 bg-light rounded-2 justify-content-center">
+                    <div class="d-flex align-items-center gap-1">
+                        <span class="badge bg-white text-dark border">6:00 AM</span>
+                        <span class="text-success fw-semibold">Available</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <span class="badge bg-danger-subtle text-danger border">Booked</span>
+                        <span class="text-danger fw-semibold">Booked</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <span class="badge bg-success text-white">Selected</span>
+                    </div>
+                </div>
+
+                <!-- Slots Grid (6 AM to 11 PM) -->
+                <label class="form-label small fw-bold text-dark mb-2 d-flex justify-content-between">
+                    <span>Available Hourly Slots</span>
+                    <span id="slotStatusBadge" class="badge bg-light text-muted">Pick a slot</span>
+                </label>
+
+                <div id="slotsGrid" class="row g-2 mb-3" style="max-height: 280px; overflow-y: auto;">
+                    {% for slot in all_slots %}
+                        <div class="col-6">
+                            {% if slot.id in booked_slot_ids %}
+                                <div class="slot-btn disabled" data-slot-id="{{ slot.id }}" data-slot-label="{{ slot.label }}">
+                                    <span class="small fw-bold">{{ slot.label }}</span>
+                                    <span class="badge bg-danger text-white" style="font-size: 0.65rem;">BOOKED</span>
+                                </div>
+                            {% else %}
+                                <div class="slot-btn" data-slot-id="{{ slot.id }}" data-slot-label="{{ slot.label }}" onclick="selectSlot(this)">
+                                    <span class="small fw-bold">{{ slot.label }}</span>
+                                    <span class="text-success small" style="font-size: 0.7rem;">Available</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Selected Summary Box -->
+                <div class="p-3 bg-light rounded-2 mb-3 border">
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Selected Slot:</span>
+                        <strong id="summarySlot" class="text-dark">None</strong>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Date:</span>
+                        <strong id="summaryDate" class="text-dark">{{ selected_date|date:"D, d M Y" }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted">
+                        <span>Hourly Rate:</span>
+                        <strong class="text-success fs-5">₹{{ turf.price|floatformat:0 }}</strong>
+                    </div>
+                </div>
+
+                <!-- Book Now CTA Button -->
+                {% if request.user.is_authenticated %}
+                    <button type="button" id="proceedBtn" class="btn btn-turf btn-lg w-100 fw-bold py-2" onclick="proceedToBooking()" disabled>
+                        Select a Time Slot <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                {% else %}
+                    <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-turf btn-lg w-100 fw-bold py-2 text-center">
+                        Login to Book Slot <i class="bi bi-box-arrow-in-right ms-1"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const TURF_ID = "{{ turf.id }}";
+    const TURF_SLUG = "{{ turf.slug }}";
+    let selectedSlotId = null;
+    let selectedSlotLabel = null;
+    let selectedDate = document.getElementById('matchDatePicker').value;
+
+    function selectSlot(element) {
+        if (element.classList.contains('disabled')) return;
+
+        document.querySelectorAll('.slot-btn').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+
+        selectedSlotId = element.getAttribute('data-slot-id');
+        selectedSlotLabel = element.getAttribute('data-slot-label');
+
+        document.getElementById('summarySlot').innerText = selectedSlotLabel;
+        document.getElementById('slotStatusBadge').innerText = selectedSlotLabel + ' Selected';
+        document.getElementById('slotStatusBadge').className = 'badge bg-success text-white';
+
+        const btn = document.getElementById('proceedBtn');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `Book Slot (${selectedSlotLabel}) &bull; ₹{{ turf.price|floatformat:0 }}`;
+        }
+    }
+
+    // Dynamic slot checking on date change
+    document.getElementById('matchDatePicker').addEventListener('change', function() {
+        selectedDate = this.value;
+        document.getElementById('summaryDate').innerText = selectedDate;
+
+        selectedSlotId = null;
+        selectedSlotLabel = null;
+        document.getElementById('summarySlot').innerText = 'None';
+        const btn = document.getElementById('proceedBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerText = 'Select a Time Slot';
+        }
+        document.getElementById('slotStatusBadge').innerText = 'Updating slots...';
+
+        fetch(`/api/check-slots/?turf_id=${TURF_ID}&date=${selectedDate}`)
+            .then(res => res.json())
+            .then(data => {
+                const bookedIds = data.booked_slot_ids || [];
+                const buttons = document.querySelectorAll('.slot-btn');
+                buttons.forEach(b => {
+                    const slotId = parseInt(b.getAttribute('data-slot-id'));
+                    b.classList.remove('selected');
+                    if (bookedIds.includes(slotId)) {
+                        b.className = 'slot-btn disabled';
+                        b.onclick = null;
+                        b.innerHTML = `
+                            <span class="small fw-bold">${b.getAttribute('data-slot-label')}</span>
+                            <span class="badge bg-danger text-white" style="font-size: 0.65rem;">BOOKED</span>
+                        `;
+                    } else {
+                        b.className = 'slot-btn';
+                        b.onclick = function() { selectSlot(this); };
+                        b.innerHTML = `
+                            <span class="small fw-bold">${b.getAttribute('data-slot-label')}</span>
+                            <span class="text-success small" style="font-size: 0.7rem;">Available</span>
+                        `;
+                    }
+                });
+
+                document.getElementById('slotStatusBadge').innerText = `${bookedIds.length} booked`;
+                document.getElementById('slotStatusBadge').className = 'badge bg-light text-muted';
+            });
+    });
+
+    function proceedToBooking() {
+        if (!selectedSlotId) {
+            alert("Please select an available time slot first!");
+            return;
+        }
+        window.location.href = `/book/${TURF_SLUG}/?date=${selectedDate}&slot_id=${selectedSlotId}`;
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Complete Payment - Booking {{ booking.booking_id }} | TurfX{% endblock %}
+
+{% block content %}
+<div class="bg-dark text-white py-4 border-bottom">
+    <div class="container text-center">
+        <h1 class="h3 fw-bold mb-1">Secure Payment Gateway</h1>
+        <p class="text-white-50 mb-0 small">Booking Reference: <span class="text-turf fw-bold">{{ booking.booking_id }}</span></p>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row justify-content-center g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 rounded-4 shadow-sm bg-white overflow-hidden">
+                <!-- Header with Amount -->
+                <div class="p-4 bg-light border-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-1">{{ turf.name }}</h5>
+                        <div class="text-muted small">
+                            <i class="bi bi-calendar-event text-turf me-1"></i> {{ booking.date|date:"D, d M Y" }} &bull;
+                            <i class="bi bi-clock text-turf me-1"></i> {{ booking.slot.label }}
+                        </div>
+                    </div>
+                    <div class="text-md-end">
+                        <span class="text-muted small d-block">Amount to Pay</span>
+                        <span class="fs-2 fw-bold text-turf">₹{{ booking.total_price|floatformat:0 }}</span>
+                    </div>
+                </div>
+
+                <div class="p-4">
+                    <h5 class="fw-bold text-dark mb-3">Choose Payment Method</h5>
+
+                    <!-- Payment Navigation Tabs -->
+                    <ul class="nav nav-pills mb-4 nav-fill gap-2" id="paymentTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active py-2 rounded-3 fw-bold border" id="upi-tab" data-bs-toggle="pill" data-bs-target="#upi-panel" type="button" role="tab">
+                                <i class="bi bi-qr-code-scan me-1 text-turf"></i> UPI / QR
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link py-2 rounded-3 fw-bold border" id="card-tab" data-bs-toggle="pill" data-bs-target="#card-panel" type="button" role="tab">
+                                <i class="bi bi-credit-card-2-front me-1 text-primary"></i> Cards
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link py-2 rounded-3 fw-bold border" id="netbanking-tab" data-bs-toggle="pill" data-bs-target="#netbanking-panel" type="button" role="tab">
+                                <i class="bi bi-bank me-1 text-warning"></i> Net Banking
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link py-2 rounded-3 fw-bold border" id="venue-tab" data-bs-toggle="pill" data-bs-target="#venue-panel" type="button" role="tab">
+                                <i class="bi bi-cash-stack me-1 text-success"></i> Pay at Venue
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Payment Forms Container -->
+                    <form action="{% url 'process_payment' booking.booking_id %}" method="POST" id="paymentForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="payment_method" id="selectedPaymentMethod" value="UPI">
+
+                        <div class="tab-content" id="paymentTabsContent">
+                            <!-- UPI / QR Panel -->
+                            <div class="tab-pane fade show active" id="upi-panel" role="tabpanel">
+                                <div class="row align-items-center g-4 p-3 bg-light rounded-4">
+                                    <div class="col-md-5 text-center border-end-md">
+                                        <!-- Simulated Dynamic QR Code -->
+                                        <div class="p-3 bg-white rounded-3 shadow-sm d-inline-block border">
+                                            <div style="width: 170px; height: 170px; background: url('https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=upi%3A%2F%2Fpay%3Fpa%3Dturfx%40okaxis%26pn%3DTurfX%26am%3D{{ booking.total_price }}%26tn%3D{{ booking.booking_id }}') center/contain no-repeat, #ffffff;" class="mx-auto"></div>
+                                        </div>
+                                        <div class="mt-2 text-muted small fw-semibold">
+                                            Scan using any UPI App
+                                        </div>
+                                        <div class="d-flex justify-content-center gap-2 mt-1 fs-5 text-muted">
+                                            <i class="bi bi-google" title="GPay"></i>
+                                            <i class="bi bi-phone" title="PhonePe"></i>
+                                            <i class="bi bi-wallet2" title="Paytm"></i>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-7">
+                                        <label class="form-label small fw-bold text-dark">Or Enter Virtual Payment Address (UPI ID)</label>
+                                        <div class="input-group mb-3">
+                                            <input type="text" class="form-control" placeholder="e.g. mobile@okaxis / user@paytm" value="{{ request.user.username|slice:':10' }}@upi">
+                                            <button class="btn btn-outline-secondary" type="button">Verify</button>
+                                        </div>
+                                        <div class="small text-muted">
+                                            <i class="bi bi-shield-check text-turf me-1"></i> Instant payment confirmation via simulated secure switch.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cards Panel -->
+                            <div class="tab-pane fade" id="card-panel" role="tabpanel">
+                                <div class="p-3 bg-light rounded-4">
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <label class="form-label small fw-bold text-dark">Card Number</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" placeholder="4111 •••• •••• 1111" maxlength="19" value="4111 2222 3333 4444">
+                                                <span class="input-group-text"><i class="bi bi-credit-card text-muted"></i></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold text-dark">Cardholder Name</label>
+                                            <input type="text" class="form-control" placeholder="Name on card" value="{{ booking.captain_name }}">
+                                        </div>
+                                        <div class="col-md-3 col-6">
+                                            <label class="form-label small fw-bold text-dark">Expiry Date</label>
+                                            <input type="text" class="form-control" placeholder="MM/YY" maxlength="5" value="12/28">
+                                        </div>
+                                        <div class="col-md-3 col-6">
+                                            <label class="form-label small fw-bold text-dark">CVV</label>
+                                            <input type="password" class="form-control" placeholder="•••" maxlength="4" value="123">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Net Banking Panel -->
+                            <div class="tab-pane fade" id="netbanking-panel" role="tabpanel">
+                                <div class="p-3 bg-light rounded-4">
+                                    <label class="form-label small fw-bold text-dark mb-3">Select Your Bank</label>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-sm-3 col-6">
+                                            <div class="p-3 bg-white rounded-3 border text-center cursor-pointer hover-shadow">
+                                                <i class="bi bi-bank fs-4 text-primary d-block mb-1"></i>
+                                                <span class="small fw-semibold text-dark">HDFC Bank</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3 col-6">
+                                            <div class="p-3 bg-white rounded-3 border text-center cursor-pointer hover-shadow">
+                                                <i class="bi bi-bank fs-4 text-danger d-block mb-1"></i>
+                                                <span class="small fw-semibold text-dark">SBI</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3 col-6">
+                                            <div class="p-3 bg-white rounded-3 border text-center cursor-pointer hover-shadow">
+                                                <i class="bi bi-bank fs-4 text-warning d-block mb-1"></i>
+                                                <span class="small fw-semibold text-dark">ICICI Bank</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3 col-6">
+                                            <div class="p-3 bg-white rounded-3 border text-center cursor-pointer hover-shadow">
+                                                <i class="bi bi-bank fs-4 text-danger d-block mb-1"></i>
+                                                <span class="small fw-semibold text-dark">Axis Bank</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <select class="form-select">
+                                        <option>Other Popular Banks...</option>
+                                        <option>Kotak Mahindra Bank</option>
+                                        <option>Bank of Baroda</option>
+                                        <option>Punjab National Bank</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Pay at Venue Panel -->
+                            <div class="tab-pane fade" id="venue-panel" role="tabpanel">
+                                <div class="p-4 bg-light rounded-4 text-center">
+                                    <i class="bi bi-cash-coin fs-1 text-success mb-2 d-inline-block"></i>
+                                    <h5 class="fw-bold text-dark">Pay Directly at the Turf Counter</h5>
+                                    <p class="text-muted small max-w-md mx-auto mb-0">
+                                        Your slot is reserved. You can pay via Cash, Google Pay, or Card directly at the front desk before your match begins.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="mt-4 pt-3 border-top d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
+                            <div class="small text-muted">
+                                <i class="bi bi-shield-lock-fill text-turf me-1"></i> 256-Bit SSL Encrypted & Simulated Payment Gateway
+                            </div>
+                            <button type="submit" class="btn btn-turf btn-lg px-5 py-3 fw-bold rounded-3 shadow">
+                                Confirm & Pay ₹{{ booking.total_price|floatformat:0 }} <i class="bi bi-check2-circle ms-1"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Update hidden payment method on tab click
+    document.getElementById('upi-tab').addEventListener('click', () => {
+        document.getElementById('selectedPaymentMethod').value = 'UPI';
+    });
+    document.getElementById('card-tab').addEventListener('click', () => {
+        document.getElementById('selectedPaymentMethod').value = 'CARD';
+    });
+    document.getElementById('netbanking-tab').addEventListener('click', () => {
+        document.getElementById('selectedPaymentMethod').value = 'NETBANKING';
+    });
+    document.getElementById('venue-tab').addEventListener('click', () => {
+        document.getElementById('selectedPaymentMethod').value = 'PAY_AT_VENUE';
+    });
+</script>
+{% endblock %}

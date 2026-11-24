@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Booking Confirmed - {{ booking.booking_id }} | TurfX{% endblock %}
+
+{% block extra_head %}
+<style>
+    .ticket-card {
+        background: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.15);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .ticket-header {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: #ffffff;
+        padding: 2.5rem 2rem 2rem;
+        position: relative;
+    }
+
+    .ticket-perforation {
+        position: relative;
+        height: 24px;
+        background: radial-gradient(circle, transparent 0 10px, #ffffff 11px);
+        background-size: 24px 24px;
+        background-position: -12px 0;
+        border-top: 2px dashed #cbd5e1;
+    }
+
+    @media print {
+        .navbar, .footer-turfx, .no-print {
+            display: none !important;
+        }
+        body {
+            background: white !important;
+        }
+        .ticket-card {
+            box-shadow: none !important;
+            border: 1px solid #000 !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <!-- Main Digital Ticket / Receipt Card -->
+            <div class="ticket-card">
+                <!-- Header -->
+                <div class="ticket-header text-center">
+                    <div class="rounded-circle bg-success text-white p-3 d-inline-flex mb-3 shadow">
+                        <i class="bi bi-check-lg display-6 fw-bold"></i>
+                    </div>
+                    <span class="badge badge-lowest-price px-3 py-1 mb-2 d-inline-block">CONFIRMED MATCH PASS</span>
+                    <h2 class="fw-bold mb-1">Booking Confirmed!</h2>
+                    <p class="text-white-50 small mb-0">Your slot is locked with TurfX Lowest Price Guarantee</p>
+                </div>
+
+                <!-- Perforation Line -->
+                <div class="ticket-perforation"></div>
+
+                <!-- Ticket Content Body -->
+                <div class="p-4 p-md-5">
+                    <!-- Booking ID & QR Display -->
+                    <div class="row align-items-center g-4 mb-4 pb-4 border-bottom">
+                        <div class="col-sm-7">
+                            <span class="text-muted small text-uppercase fw-bold letter-spacing-1">Booking Reference ID</span>
+                            <h3 class="fw-extrabold text-turf mb-1 brand-font">{{ booking.booking_id }}</h3>
+                            <div class="text-muted small">Show this code or scan the QR pass at venue reception.</div>
+                        </div>
+                        <div class="col-sm-5 text-center text-sm-end">
+                            <!-- Digital Entry QR Code -->
+                            <div class="p-2 bg-light border rounded-3 d-inline-block">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=TURFX-PASS%3A{{ booking.booking_id }}" alt="Check-in QR" style="width: 105px; height: 105px;">
+                            </div>
+                            <div class="text-muted small mt-1" style="font-size: 0.7rem;">Entry Check-in Pass</div>
+                        </div>
+                    </div>
+
+                    <!-- Venue & Match Details -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-12">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <span class="badge bg-secondary mb-1">{{ turf.get_sport_type_display }}</span>
+                                <h5 class="fw-bold text-dark mb-1">{{ turf.name }}</h5>
+                                <div class="text-muted small">
+                                    <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ turf.address }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <span class="text-muted small d-block">Scheduled Date</span>
+                            <span class="fw-bold text-dark fs-6">{{ booking.date|date:"D, d M Y" }}</span>
+                        </div>
+
+                        <div class="col-6">
+                            <span class="text-muted small d-block">Time Slot</span>
+                            <span class="fw-bold text-turf fs-6">{{ booking.slot.label }}</span>
+                        </div>
+
+                        <div class="col-6">
+                            <span class="text-muted small d-block">Captain / Booker</span>
+                            <span class="fw-bold text-dark fs-6">{{ booking.captain_name }}</span>
+                            <small class="text-muted d-block">{{ booking.captain_phone }}</small>
+                        </div>
+
+                        <div class="col-6">
+                            <span class="text-muted small d-block">Payment Method & Status</span>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold">
+                                <i class="bi bi-check-circle-fill me-1"></i> Paid ({{ payment.get_payment_method_display|default:'UPI' }})
+                            </span>
+                            <small class="text-muted d-block">Tx: {{ payment.transaction_id|default:'TX-SIMULATED' }}</small>
+                        </div>
+                    </div>
+
+                    <!-- Financial Summary Box -->
+                    <div class="p-3 rounded-3 bg-turf-subtle border border-success-subtle mb-4 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-bold text-success d-block small">Lowest Price Deal Applied</span>
+                            <small class="text-muted">Original Rate: ₹{{ booking.base_price|floatformat:0 }}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="text-muted small d-block">Total Paid</span>
+                            <span class="fs-3 fw-bold text-dark">₹{{ booking.total_price|floatformat:0 }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Important Match Day Guidelines -->
+                    <div class="mb-4 text-muted small">
+                        <h6 class="fw-bold text-dark mb-2"><i class="bi bi-info-circle text-turf me-1"></i> Match Day Instructions:</h6>
+                        <ul class="ps-3 mb-0">
+                            <li>Please reach the turf 10 minutes prior to slot start time.</li>
+                            <li>Wear appropriate sports shoes (non-marking turf shoes recommended).</li>
+                            <li>To reschedule without fees, visit <strong>My Bookings</strong> at least 2 hours before the slot.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-column flex-sm-row gap-2 no-print">
+                        <button onclick="window.print()" class="btn btn-outline-dark rounded-3 flex-grow-1 py-2 fw-semibold">
+                            <i class="bi bi-printer me-1"></i> Print / Save Ticket
+                        </button>
+                        <a href="{% url 'my_bookings' %}" class="btn btn-turf rounded-3 flex-grow-1 py-2 fw-semibold text-center">
+                            <i class="bi bi-calendar-check me-1"></i> View My Bookings
+                        </a>
+                        <a href="{% url 'turf_list' %}" class="btn btn-outline-secondary rounded-3 py-2" title="Explore More Turfs">
+                            <i class="bi bi-plus-lg"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

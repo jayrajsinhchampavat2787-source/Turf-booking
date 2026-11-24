@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - TURFX{% endblock %}
+
+{% block content %}
+<!-- Admin Dashboard Sub-Header -->
+<div class="bg-dark text-white py-3 border-bottom">
+    <div class="container d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+        <div>
+            <div class="badge bg-warning text-dark mb-1">TURFX MANAGEMENT CONSOLE</div>
+            <h1 class="h4 fw-bold mb-0">Administrator Dashboard</h1>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'admin_bookings' %}" class="btn btn-success btn-sm fw-semibold">
+                <i class="bi bi-card-checklist me-1"></i> Manage Bookings
+            </a>
+            <a href="{% url 'admin_turfs' %}" class="btn btn-outline-light btn-sm fw-semibold">
+                <i class="bi bi-grid-3x3-gap me-1"></i> Manage Turfs
+            </a>
+            <a href="{% url 'admin_users' %}" class="btn btn-outline-light btn-sm fw-semibold">
+                <i class="bi bi-people me-1"></i> Registered Users
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <!-- Real Statistics Grid from SQL Server -->
+    <div class="row g-3 mb-4">
+        <!-- Total Bookings -->
+        <div class="col-lg-2 col-md-4 col-6">
+            <div class="card border-0 rounded-3 p-3 shadow-sm bg-white h-100 border-start border-4 border-primary">
+                <div class="text-muted small text-uppercase fw-bold">Total Bookings</div>
+                <h3 class="fw-bold text-dark mt-1 mb-0">{{ total_bookings }}</h3>
+                <small class="text-muted" style="font-size: 0.75rem;">All-time bookings</small>
+            </div>
+        </div>
+
+        <!-- Pending Bookings -->
+        <div class="col-lg-2 col-md-4 col-6">
+            <div class="card border-0 rounded-3 p-3 shadow-sm bg-white h-100 border-start border-4 border-warning">
+                <div class="text-muted small text-uppercase fw-bold">Pending</div>
+                <h3 class="fw-bold text-warning mt-1 mb-0">{{ pending_bookings }}</h3>
+                <small class="text-muted" style="font-size: 0.75rem;">Needs action</small>
+            </div>
+        </div>
+
+        <!-- Accepted Bookings -->
+        <div class="col-lg-2 col-md-4 col-6">
+            <div class="card border-0 rounded-3 p-3 shadow-sm bg-white h-100 border-start border-4 border-success">
+                <div class="text-muted small text-uppercase fw-bold">Accepted</div>
+                <h3 class="fw-bold text-success mt-1 mb-0">{{ accepted_bookings }}</h3>
+                <small class="text-muted" style="font-size: 0.75rem;">Confirmed slots</small>
+            </div>
+        </div>
+
+        <!-- Rejected Bookings -->
+        <div class="col-lg-2 col-md-4 col-6">
+            <div class="card border-0 rounded-3 p-3 shadow-sm bg-white h-100 border-start border-4 border-danger">
+                <div class="text-muted small text-uppercase fw-bold">Rejected</div>
+                <h3 class="fw-bold text-danger mt-1 mb-0">{{ rejected_bookings }}</h3>
+                <small class="text-muted" style="font-size: 0.75rem;">Declined requests</small>
+            </div>
+        </div>
+
+        <!-- Total Registered Users -->
+        <div class="col-lg-2 col-md-4 col-6">
+            <div class="card border-0 rounded-3 p-3 shadow-sm bg-white h-100 border-start border-4 border-info">
+                <div class="text-muted small text-uppercase fw-bold">Registered Users</div>
+                <h3 class="fw-bold text-dark mt-1 mb-0">{{ total_users }}</h3>
+                <small class="text-muted" style="font-size: 0.75rem;">Player accounts</small>
+            </div>
+        </div>
+
+        <!-- Total Turfs -->
+        <div class="col-lg-2 col-md-4 col-6">
+            <div class="card border-0 rounded-3 p-3 shadow-sm bg-white h-100 border-start border-4 border-dark">
+                <div class="text-muted small text-uppercase fw-bold">Total Turfs</div>
+                <h3 class="fw-bold text-dark mt-1 mb-0">{{ total_turfs }}</h3>
+                <small class="text-muted" style="font-size: 0.75rem;">Active cricket grounds</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Bookings Table -->
+    <div class="card border-0 rounded-3 shadow-sm bg-white overflow-hidden mb-4">
+        <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
+            <h5 class="fw-bold text-dark mb-0"><i class="bi bi-clock-history me-1 text-success"></i> Recent Booking Requests</h5>
+            <a href="{% url 'admin_bookings' %}" class="btn btn-outline-dark btn-sm">
+                View All Bookings <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-uppercase">
+                    <tr>
+                        <th class="ps-3">ID</th>
+                        <th>Customer</th>
+                        <th>Turf</th>
+                        <th>Match Date &amp; Slot</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th class="text-end pe-3">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in recent_bookings %}
+                        <tr>
+                            <td class="ps-3 fw-bold font-monospace text-success">#{{ b.booking_id }}</td>
+                            <td>
+                                <div class="fw-bold">{{ b.customer_name }}</div>
+                                <div class="small text-muted">{{ b.customer_email }}</div>
+                            </td>
+                            <td>{{ b.turf.name }}</td>
+                            <td>
+                                <div>{{ b.booking_date|date:"d M Y" }}</div>
+                                <small class="text-muted">{{ b.slot.label }}</small>
+                            </td>
+                            <td class="fw-bold">₹{{ b.total_amount|floatformat:0 }}</td>
+                            <td>
+                                {% if b.status == 'Pending' %}
+                                    <span class="badge-pending">Pending</span>
+                                {% elif b.status == 'Accepted' %}
+                                    <span class="badge-accepted">Accepted</span>
+                                {% elif b.status == 'Rejected' %}
+                                    <span class="badge-rejected">Rejected</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-3">
+                                {% if b.status == 'Pending' %}
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'admin_accept_booking' b.booking_id %}" class="btn btn-success" title="Accept Booking">
+                                            <i class="bi bi-check-lg"></i> Accept
+                                        </a>
+                                        <a href="{% url 'admin_reject_booking' b.booking_id %}" class="btn btn-outline-danger" title="Reject Booking">
+                                            <i class="bi bi-x-lg"></i> Reject
+                                        </a>
+                                    </div>
+                                {% else %}
+                                    <span class="small text-muted">Completed</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">No bookings recorded yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

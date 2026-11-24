@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Confirm Booking - {{ turf.name }} | TURFX{% endblock %}
+
+{% block content %}
+<div class="bg-dark text-white py-4 border-bottom">
+    <div class="container">
+        <h1 class="h3 fw-bold mb-1">Confirm Cricket Turf Booking</h1>
+        <p class="text-white-50 mb-0 small">Review match time, customer details, and confirm reservation.</p>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row justify-content-center g-4">
+        <!-- Booking Form -->
+        <div class="col-lg-7">
+            <div class="card border-0 rounded-3 p-4 shadow-sm bg-white mb-4">
+                <h5 class="fw-bold text-dark pb-2 border-bottom mb-3">
+                    <i class="bi bi-person-lines-fill text-success me-2"></i>Customer &amp; Contact Information
+                </h5>
+
+                <form action="{% url 'book_turf' turf.slug %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="booking_date" value="{{ booking_date|date:'Y-m-d' }}">
+                    <input type="hidden" name="slot_id" value="{{ slot.id }}">
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-dark">Customer Name *</label>
+                            {{ form.customer_name }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Email Address *</label>
+                            {{ form.customer_email }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Mobile Contact Number *</label>
+                            {{ form.customer_phone }}
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-2 text-muted small mb-4 border">
+                        <i class="bi bi-info-circle-fill text-success me-1"></i>
+                        <strong>Booking Workflow:</strong> Upon submission, your booking will be saved in Microsoft SQL Server with status <strong>Pending</strong>. The administrator will review and accept your booking.
+                    </div>
+
+                    <button type="submit" class="btn btn-turf btn-lg w-100 fw-bold py-3 shadow-sm rounded-2">
+                        Confirm Booking &bull; ₹{{ turf.price|floatformat:0 }} <i class="bi bi-check2-circle ms-1"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Match Reservation Summary -->
+        <div class="col-lg-5">
+            <div class="card border-0 rounded-3 p-4 shadow-sm bg-white sticky-top" style="top: 85px;">
+                <h5 class="fw-bold text-dark pb-2 border-bottom mb-3">
+                    <i class="bi bi-receipt text-success me-2"></i>Match Reservation Summary
+                </h5>
+
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <img src="{{ turf.display_image }}" alt="{{ turf.name }}" class="rounded-2" style="width: 75px; height: 75px; object-fit: cover;">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">{{ turf.name }}</h6>
+                        <div class="text-muted small"><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ turf.location }}</div>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-light rounded-2 mb-3 border">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small"><i class="bi bi-calendar-check text-success me-1"></i> Match Date:</span>
+                        <strong class="text-dark small">{{ booking_date|date:"D, d M Y" }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-0">
+                        <span class="text-muted small"><i class="bi bi-clock-fill text-success me-1"></i> Match Slot:</span>
+                        <strong class="text-success small">{{ slot.label }}</strong>
+                    </div>
+                </div>
+
+                <div class="border-top pt-3 d-flex justify-content-between align-items-center mb-3">
+                    <span class="fw-bold text-dark">Total Amount to Pay:</span>
+                    <span class="fs-3 fw-bold text-success">₹{{ turf.price|floatformat:0 }}</span>
+                </div>
+
+                <div class="small text-muted">
+                    <i class="bi bi-database-check text-success me-1"></i> Permanent SQL Server database record will be created.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

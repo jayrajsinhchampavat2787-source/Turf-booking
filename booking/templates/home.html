@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}TURFX - Cricket Turf Booking Management System{% endblock %}
+
+{% block content %}
+<!-- Cricket-Themed Banner -->
+<section class="py-5 text-white" style="background: linear-gradient(135deg, #0f172a 0%, #15803d 100%);">
+    <div class="container py-4">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-dark border border-success mb-3">
+                    <span class="badge bg-success">CRICKET TURF BOOKING</span>
+                    <span class="small text-light">Powered by Microsoft SQL Server</span>
+                </div>
+                
+                <h1 class="display-4 fw-bold mb-3">
+                    TURFX Cricket Turf <br><span class="text-success">Booking System</span>
+                </h1>
+                
+                <p class="lead text-light opacity-90 mb-4" style="max-width: 580px;">
+                    Simple, fast, and reliable cricket turf reservations. Browse our 10 premier cricket grounds, choose an available time slot, and book instantly with permanent database tracking.
+                </p>
+
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{% url 'turf_list' %}" class="btn btn-success btn-lg px-4 py-2 fw-bold rounded-2">
+                        <i class="bi bi-grid-fill me-1"></i> Explore Turfs
+                    </a>
+                    {% if not request.user.is_authenticated %}
+                        <a href="{% url 'register' %}" class="btn btn-outline-light btn-lg px-4 py-2 fw-semibold rounded-2">
+                            Create Account
+                        </a>
+                    {% else %}
+                        <a href="{% url 'my_bookings' %}" class="btn btn-outline-light btn-lg px-4 py-2 fw-semibold rounded-2">
+                            <i class="bi bi-calendar-check me-1"></i> My Bookings
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-lg-5 text-center d-none d-lg-block">
+                <div class="p-3 bg-white bg-opacity-10 rounded-3 border border-light border-opacity-25 shadow">
+                    <img src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=800&auto=format&fit=crop" alt="Cricket Turf" class="img-fluid rounded-2 shadow" style="height: 280px; width: 100%; object-fit: cover;">
+                    <div class="mt-2 text-start small text-light">
+                        <strong>Lord's Cricket Arena</strong> &bull; Starting at ₹50/hr
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Cricket Turfs Grid -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-dark mb-0">Featured Cricket Turfs</h2>
+                <small class="text-muted">Top cricket grounds available for online booking</small>
+            </div>
+            <a href="{% url 'turf_list' %}" class="btn btn-outline-success fw-semibold rounded-2">
+                View All {{ total_turfs }} Turfs <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {% for turf in featured_turfs %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="turf-card h-100 d-flex flex-column">
+                        <div class="turf-thumb">
+                            <img src="{{ turf.display_image }}" alt="{{ turf.name }}" loading="lazy">
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge bg-success fw-bold">₹{{ turf.price|floatformat:0 }} / hr</span>
+                            </div>
+                        </div>
+
+                        <div class="p-4 d-flex flex-column flex-grow-1">
+                            <h5 class="fw-bold text-dark mb-1">{{ turf.name }}</h5>
+                            <div class="text-muted small mb-2">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ turf.location }}
+                            </div>
+
+                            <p class="text-muted small mb-3 flex-grow-1">
+                                {{ turf.description|truncatewords:16 }}
+                            </p>
+
+                            <div class="d-flex gap-2 pt-2 border-top">
+                                <a href="{% url 'turf_detail' turf.slug %}" class="btn btn-outline-secondary btn-sm flex-grow-1 fw-semibold py-2">
+                                    View Details
+                                </a>
+                                <a href="{% url 'turf_detail' turf.slug %}" class="btn btn-turf btn-sm flex-grow-1 fw-semibold py-2 text-center">
+                                    Book Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center py-4 text-muted">
+                    No turfs available. Run seed script.
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

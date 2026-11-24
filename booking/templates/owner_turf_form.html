@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - TurfX{% endblock %}
+
+{% block content %}
+<div class="bg-dark text-white py-4 border-bottom">
+    <div class="container">
+        <h1 class="h3 fw-bold mb-1">{{ title }}</h1>
+        <p class="text-white-50 mb-0 small">Configure turf location, hourly pricing, amenities, and photos.</p>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card border-0 rounded-4 p-4 p-md-5 shadow-sm bg-white">
+                <form method="POST">
+                    {% csrf_token %}
+                    <h5 class="fw-bold text-dark pb-2 border-bottom mb-3">1. Basic Information</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-8">
+                            <label class="form-label small fw-bold text-dark">Turf Venue Name *</label>
+                            {{ form.name }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-dark">Sport Type *</label>
+                            {{ form.sport_type }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">City *</label>
+                            {{ form.city }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Area / Locality *</label>
+                            {{ form.area }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-dark">Full Venue Address *</label>
+                            {{ form.address }}
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold text-dark pb-2 border-bottom mb-3">2. Pricing & Lowest Price Deal</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">TurfX Lowest Price Rate (₹/hr) *</label>
+                            {{ form.hourly_rate }}
+                            <small class="text-muted">The discounted rate charged to customers on TurfX</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Standard Market Rate (₹/hr) *</label>
+                            {{ form.original_rate }}
+                            <small class="text-muted">Shown with strike-through to highlight the deal discount</small>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold text-dark pb-2 border-bottom mb-3">3. Descriptions & Rules</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-dark">Turf Description *</label>
+                            {{ form.description }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-dark">Turf Rules & Guidelines</label>
+                            {{ form.rules }}
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold text-dark pb-2 border-bottom mb-3">4. Photos & Media</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-dark">Main Image URL</label>
+                            {{ form.image_url }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-dark">Gallery Image URLs (Comma-separated)</label>
+                            {{ form.gallery_images }}
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold text-dark pb-2 border-bottom mb-3">5. Amenities & Flags</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6 col-md-3">
+                            <div class="form-check form-switch">
+                                {{ form.has_floodlights }}
+                                <label class="form-check-label small fw-semibold">Floodlights</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="form-check form-switch">
+                                {{ form.has_parking }}
+                                <label class="form-check-label small fw-semibold">Parking</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="form-check form-switch">
+                                {{ form.has_drinking_water }}
+                                <label class="form-check-label small fw-semibold">RO Water</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="form-check form-switch">
+                                {{ form.has_washroom }}
+                                <label class="form-check-label small fw-semibold">Washroom</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="form-check form-switch">
+                                {{ form.has_equipment_rental }}
+                                <label class="form-check-label small fw-semibold">Equipment Rental</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="form-check form-switch">
+                                {{ form.has_changing_room }}
+                                <label class="form-check-label small fw-semibold">Changing Room</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="form-check form-switch">
+                                {{ form.has_first_aid }}
+                                <label class="form-check-label small fw-semibold">First Aid</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="form-check form-switch">
+                                {{ form.has_cafeteria }}
+                                <label class="form-check-label small fw-semibold">Cafeteria</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="form-check form-switch">
+                                {{ form.is_featured }}
+                                <label class="form-check-label small fw-semibold text-turf">Featured on Home</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="form-check form-switch">
+                                {{ form.is_active }}
+                                <label class="form-check-label small fw-semibold">Is Active</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between pt-3 border-top">
+                        <a href="{% url 'owner_dashboard' %}" class="btn btn-outline-secondary px-4 py-2">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-turf px-4 py-2 fw-bold shadow">
+                            Save Turf Details <i class="bi bi-check2 ms-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Explore Cricket Turfs - TURFX{% endblock %}
+
+{% block content %}
+<div class="bg-dark text-white py-4 border-bottom">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <h1 class="h3 fw-bold mb-1">Cricket Turf Listings</h1>
+                <p class="text-white-50 mb-0 small">Browse our complete directory of {{ total_count }} cricket turfs with live slot availability.</p>
+            </div>
+            <div>
+                <span class="badge bg-success px-3 py-2 fs-6">
+                    <i class="bi bi-database-check me-1"></i> Stored in SQL Server
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <!-- Filter Bar Card -->
+    <div class="card p-3 shadow-sm border-0 rounded-3 mb-4 bg-white">
+        <form method="GET" class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <input type="text" name="q" class="form-control rounded-2" placeholder="Search by turf name, area, location..." value="{{ q }}">
+            </div>
+            <div class="col-md-3">
+                <select name="sort" class="form-select rounded-2">
+                    <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Sort: Price Low to High</option>
+                    <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Sort: Price High to Low</option>
+                    <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Sort: Name (A-Z)</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-turf flex-grow-1 rounded-2 py-2 fw-semibold">
+                    <i class="bi bi-search me-1"></i> Filter
+                </button>
+                <a href="{% url 'turf_list' %}" class="btn btn-outline-secondary rounded-2 py-2" title="Reset Filters">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Turfs Cards Grid (All 10 Turfs) -->
+    <div class="row g-4">
+        {% for turf in turfs %}
+            <div class="col-lg-4 col-md-6">
+                <div class="turf-card h-100 d-flex flex-column">
+                    <!-- 1. Turf image -->
+                    <div class="turf-thumb">
+                        <img src="{{ turf.display_image }}" alt="{{ turf.name }}" loading="lazy">
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <!-- 3. Price -->
+                            <span class="badge bg-success fw-bold fs-6">₹{{ turf.price|floatformat:0 }} / hr</span>
+                        </div>
+                    </div>
+
+                    <div class="p-4 d-flex flex-column flex-grow-1">
+                        <!-- 2. Turf name -->
+                        <h5 class="fw-bold text-dark mb-1">{{ turf.name }}</h5>
+                        
+                        <!-- 4. Location -->
+                        <div class="text-muted small mb-2">
+                            <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ turf.location }}
+                        </div>
+
+                        <!-- 5. Short description -->
+                        <p class="text-muted small mb-3 flex-grow-1">
+                            {{ turf.description }}
+                        </p>
+
+                        <!-- 6. View Details button & 7. Book Now button -->
+                        <div class="d-flex gap-2 pt-2 border-top">
+                            <a href="{% url 'turf_detail' turf.slug %}" class="btn btn-outline-secondary btn-sm flex-grow-1 fw-semibold py-2">
+                                View Details
+                            </a>
+                            <a href="{% url 'turf_detail' turf.slug %}" class="btn btn-turf btn-sm flex-grow-1 fw-semibold py-2 text-center">
+                                Book Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5 text-muted">
+                <h5>No turfs found matching criteria.</h5>
+                <a href="{% url 'turf_list' %}" class="btn btn-turf mt-2">View All Turfs</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

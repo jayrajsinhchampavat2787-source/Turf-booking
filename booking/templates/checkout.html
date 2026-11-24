@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Checkout - {{ turf.name }} | TurfX{% endblock %}
+
+{% block content %}
+<div class="bg-dark text-white py-4 border-bottom">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1 small">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-white-50 text-decoration-none">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'turf_detail' turf.slug %}" class="text-white-50 text-decoration-none">{{ turf.name }}</a></li>
+                        <li class="breadcrumb-item active text-turf" aria-current="page">Booking Summary & Checkout</li>
+                    </ol>
+                </nav>
+                <h1 class="h2 fw-bold mb-0">Booking Summary & Details</h1>
+            </div>
+            <div>
+                <span class="badge badge-lowest-price px-3 py-2">
+                    <i class="bi bi-shield-check"></i> Lowest Price Locked
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-4 justify-content-center">
+        <!-- Captain & Booking Details Form -->
+        <div class="col-lg-7">
+            <div class="card border-0 rounded-4 p-4 shadow-sm bg-white mb-4">
+                <h4 class="fw-bold text-dark mb-3">
+                    <i class="bi bi-person-badge text-turf me-2"></i>Captain & Team Details
+                </h4>
+                <p class="text-muted small mb-4">
+                    Please provide the match coordinator’s contact information. Booking confirmation and digital QR passes will be issued under this name.
+                </p>
+
+                <form action="{% url 'checkout' turf.slug %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="date" value="{{ booking_date|date:'Y-m-d' }}">
+                    <input type="hidden" name="slot_id" value="{{ slot.id }}">
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Captain / Booker Name *</label>
+                            {{ form.captain_name }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Contact Phone Number *</label>
+                            {{ form.captain_phone }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Email Address *</label>
+                            {{ form.captain_email }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Number of Players</label>
+                            {{ form.number_of_players }}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-dark">Special Requests / Notes</label>
+                            {{ form.notes }}
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 mt-4 text-muted small d-flex align-items-start gap-2">
+                        <i class="bi bi-info-circle-fill text-turf fs-5"></i>
+                        <div>
+                            <strong>Free Rescheduling Policy:</strong> You can reschedule this match slot anytime up to 2 hours prior to start time directly from your TurfX dashboard.
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top">
+                        <button type="submit" class="btn btn-turf btn-lg w-100 fw-bold py-3 shadow">
+                            Proceed to Payment • ₹{{ deal_price|floatformat:0 }} <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Order Summary Card -->
+        <div class="col-lg-5">
+            <div class="card border-0 rounded-4 p-4 shadow-sm bg-white sticky-top" style="top: 90px;">
+                <h5 class="fw-bold text-dark pb-3 border-bottom mb-3">
+                    <i class="bi bi-receipt text-turf me-2"></i>Slot Reservation Summary
+                </h5>
+
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <img src="{{ turf.image_url }}" alt="{{ turf.name }}" class="rounded-3" style="width: 75px; height: 75px; object-fit: cover;">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">{{ turf.name }}</h6>
+                        <span class="badge bg-secondary mb-1">{{ turf.get_sport_type_display }}</span>
+                        <div class="text-muted small"><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ turf.area }}, {{ turf.city }}</div>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-light rounded-3 mb-3 border">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small"><i class="bi bi-calendar3 text-turf me-1"></i> Match Date:</span>
+                        <span class="fw-bold text-dark small">{{ booking_date|date:"D, d M Y" }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-0">
+                        <span class="text-muted small"><i class="bi bi-clock-history text-turf me-1"></i> Match Slot:</span>
+                        <span class="fw-bold text-turf small">{{ slot.label }}</span>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold text-dark mb-2">Price Breakdown</h6>
+                <div class="d-flex justify-content-between text-muted small mb-2">
+                    <span>Base Hourly Rate</span>
+                    <span class="text-decoration-line-through">₹{{ base_price|floatformat:0 }}</span>
+                </div>
+                <div class="d-flex justify-content-between text-success small mb-2">
+                    <span>TurfX Lowest Price Deal</span>
+                    <span>-₹{{ discount|floatformat:0 }}</span>
+                </div>
+                <div class="d-flex justify-content-between text-muted small mb-3">
+                    <span>Platform Convenience Fee</span>
+                    <span class="text-success fw-bold">FREE (₹0)</span>
+                </div>
+
+                <div class="border-top pt-3 d-flex justify-content-between align-items-center mb-3">
+                    <span class="fs-5 fw-bold text-dark">Total Amount:</span>
+                    <span class="fs-3 fw-bold text-turf">₹{{ deal_price|floatformat:0 }}</span>
+                </div>
+
+                <div class="d-flex align-items-center gap-2 text-muted small">
+                    <i class="bi bi-shield-lock-fill text-turf fs-5"></i>
+                    <span>Zero booking fees. Lowest price guaranteed by TurfX.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
